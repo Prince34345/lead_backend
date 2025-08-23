@@ -1,14 +1,14 @@
 const express = require("express");
-
 const authMiddleware = require("../middleware/authMiddleware");
+const {postLead, getLeadById, getLeads, updateLeadById, deleteLeadbyId} = require("../controllers/leadsController")
 const Lead_Routes = express.Router();
 
 
-Lead_Routes.post("/leads" , /*  add middleware after creating user routes.  ,*/postLead);
-Lead_Routes.get("/lead/:id" , /*  add middleware after creating user routes.  ,*/ getLeadById);
-Lead_Routes.put("/lead/:id" , /*  add middleware after creating user routes.  ,*/ updateLeadById);
-Lead_Routes.get("/leads" , /*  add middleware after creating user routes.  ,*/ getLeads);
-Lead_Routes.delete("/lead/:id", /*  add middleware after creating user routes.  ,*/ deleteLeadbyId)
+Lead_Routes.post("/leads" , authMiddleware ,postLead);
+Lead_Routes.get("/lead/:id" , authMiddleware , getLeadById);
+Lead_Routes.put("/lead/:id" , authMiddleware , updateLeadById);
+Lead_Routes.get("/leads" , authMiddleware , getLeads);
+Lead_Routes.delete("/lead/:id", authMiddleware , deleteLeadbyId);
 
 
 module.exports = Lead_Routes;
