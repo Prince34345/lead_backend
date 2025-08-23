@@ -1,13 +1,11 @@
 const express = require('express');
-const Routes = require('../backend/routes/user.route');
 const connectDB = require('./db');
+const Lead_Routes = require('./routes/leadRoutes');
 require('dotenv').config();
-
 const app = express();
 
 connectDB();
-
-app.use('/', Routes);
+app.use("/", Lead_Routes)
 
 const PORT = process.env.PORT;
 
