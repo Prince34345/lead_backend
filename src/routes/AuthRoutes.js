@@ -7,7 +7,7 @@ const {registerUser, login, logout, myProfile} = require("../controllers/authCon
 Auth_Routes.post("/register" , registerUser);
 Auth_Routes.post("/login", login)
 Auth_Routes.post("/logout" , logout);
-Auth_Routes.get("/user/:id",  myProfile);
+Auth_Routes.get("/myProfile",  myProfile);
 
 
 

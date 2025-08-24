@@ -14,8 +14,8 @@ app.use(cors({
 }))
 app.use(cookieParser());
 app.use(express.json());
-app.use("/", Lead_Routes)
-app.use("/", Auth_Routes)
+app.use(Lead_Routes);
+app.use(Auth_Routes);
 
 const PORT = process.env.PORT;
 connectDB();
