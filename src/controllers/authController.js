@@ -23,16 +23,24 @@ const login = async (req, res) => {
         const token = jwt.sign({id: user.id, email: user.email}, process.env.JWT_SECRET, {expiresIn: "5d"})
 
         setCookie(res, token);
-
+        return res.json({message: "Logged In"})
     } catch (error) {
-        
+        return res.status(500).json({error: error.message})
     }
 }
 const logout = (req, res) => {
-    
+     res.clearCookie("token", {httpOnly: true, sameSite: "none", secure: true});
+     return res.json({message: "Logged Out"});
 }
-const myProfile = (req, res) => {
-    
+const myProfile  = async (req, res) => {
+    const token = req.cookies?.token;
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await UserModel.findById(decoded.id).select("-password");
+        return res.json({user});
+    } catch (error) {
+        return res.status(200).json({user: null});
+    }   
 }
 
-module.exports = {postUser, getUsers, getUserById, updateUserById, deleteUserbyId}
+module.exports = {registerUser, login, logout, myProfile}
