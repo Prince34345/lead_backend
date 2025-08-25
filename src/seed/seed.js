@@ -1,4 +1,4 @@
-require("dotenv/config.js");
+require("dotenv/config");
 const mongoose = require("mongoose");
 const LeadModel = require("../models/leadsModel");
 
@@ -27,19 +27,26 @@ const makeLead = (i) => {
     status: rand(statuses),
     score: randNum(0, 100),
     lead_value: randNum(1000, 100000),
-    last_activity_at: Math.random() > 0.3 ? new Date(Date.now() - randNum(0, 60) * 86400000) : null,
-    is_qualified: Math.random() > 0.5
+    last_activity_at:
+      Math.random() > 0.3 ? new Date(Date.now() - randNum(0, 60) * 86400000) : null,
+    is_qualified: Math.random() > 0.5,
   };
 };
 
 (async () => {
   try {
+    await mongoose.connect(process.env.DATABASE_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
     await LeadModel.deleteMany({});
     const docs = Array.from({ length: 120 }, (_, i) => makeLead(i + 1));
     await LeadModel.insertMany(docs);
   } catch (e) {
     console.error(e);
   } finally {
+    await mongoose.disconnect();
     process.exit(0);
   }
 })();
