@@ -14,6 +14,7 @@ const leadSchema = new mongoose.Schema({
     score: {type: Number, min: 0, max: 100, default: 0},
     lead_value: {type: Number, default: 0},
     last_activity_at: {type: Date, default: null},
+    created_by: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
     is_qualified: {type: Boolean, default: false}},
     {timestamps: {createdAt: "created_at", updatedAt: "updated_at"}} 
 );

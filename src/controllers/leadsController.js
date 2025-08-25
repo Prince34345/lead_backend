@@ -1,55 +1,66 @@
 const LeadModel = require("../models/leadsModel");
 const buildLeadFilters = require("../utils/parsefilters");
 
-const getLeadById = async (req, res) => {
-   try {
-      const lead = await LeadModel.findById(req.params.id);
-      if (!lead) return res.status(400).json({error: "Lead not found."});
-      return res.json(lead);
-   } catch (error) {
-      return res.status(500).json({error: error.message});
-   }
-} 
 const getLeads = async (req, res) => {
-    const page = Math.max(parseInt(req.query.page || "1", 10), 1);
-    const limit = Math.min(Math.max(parseInt(req.query.limit || "20", 10), 1), 100);
+  try {
+    const { page = 1, limit = 10 } = req.query;
     const filter = buildLeadFilters(req.query);
-   try {
-       const [data, total] = await Promise.all([LeadModel.find(filter).sort({ created_at: -1 }).skip((page - 1) * limit).limit(limit), LeadModel.countDocuments(filter)])
-       return res.json({data, page, limit, total, totalPages: Math.ceil(total / limit) || 1})
-   } catch (error) {
-       res.status(500).json({error: error.message});
-   }
-} 
+
+    const leads = await LeadModel.find({ created_by: req.user._id, ...filter })
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    const total = await LeadModel.countDocuments({ created_by: req.user._id, ...filter });
+
+    res.json({ data: leads, total });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch leads" });
+  }
+};
+
+const getLeadById = async (req, res) => {
+  try {
+    const lead = await LeadModel.findOne({ _id: req.params.id, created_by: req.user._id });
+    if (!lead) return res.status(404).json({ error: "Lead not found" });
+    res.json(lead);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch lead" });
+  }
+};
 
 const createLead = async (req, res) => {
-     try {
-        if (req.body) {
-            const response = await LeadModel.create(req.body);
-            res.status(201).json(response);
-        }
-     } catch (error) {
-        res.status(400).json({err: error.message});
-     }
-} 
+  try {
+    const lead = await LeadModel.create({ ...req.body, created_by: req.user._id });
+    res.status(201).json(lead);
+  } catch (err) {
+    res.status(400).json({ error: "Failed to create lead" });
+  }
+};
+
 const updateLeadById = async (req, res) => {
   try {
-    const lead = await LeadModel.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
+    const lead = await LeadModel.findOneAndUpdate(
+      { _id: req.params.id, created_by: req.user._id },
+      req.body,
+      { new: true, runValidators: true }
+    );
     if (!lead) return res.status(404).json({ error: "Lead not found" });
-    return res.json(lead);
-} catch (error) {
-    return res.status(400).json({ error: error.message });
+    res.json(lead);
+  } catch (err) {
+    res.status(400).json({ error: "Failed to update lead" });
   }
-} 
-const deleteLeadbyId = async (req, res) => {
-    try {
-    const lead = await LeadModel.findByIdAndDelete(req.params.id);
-    if (!lead) return res.status(404).json({ error: "Lead not found" });
-    return res.json({ message: "Lead deleted" });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-} 
+};
 
-module.exports = {getLeadById, getLeads, createLead, updateLeadById, deleteLeadbyId};
+const deleteLeadById = async (req, res) => {
+  try {
+    const lead = await LeadModel.findOneAndDelete({ _id: req.params.id, created_by: req.user._id });
+    if (!lead) return res.status(404).json({ error: "Lead not found" });
+    res.json({ message: "Lead deleted" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete lead" });
+  }
+};
+
+
+module.exports = {getLeadById, getLeads, createLead, updateLeadById, deleteLeadById};
 
