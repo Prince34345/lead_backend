@@ -1,13 +1,15 @@
 const setCookie = require("../cookie");
 const UserModel = require("../models/AuthModel");
 const jwt = require("jsonwebtoken");
+
+
 const registerUser = async (req, res) => {
      try {
-        const user = new UserModel(req.body);
+        const user = await UserModel.create(req.body);
         await user.save();
         return res.status(201).json({message: "User Registrated"})
      } catch (error) {
-        return res.status(400).json({error: e.message}); 
+        return res.status(400).json({error: error.message}); 
      }
 }
 const login = async (req, res) => {

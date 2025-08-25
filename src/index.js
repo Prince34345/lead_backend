@@ -12,10 +12,13 @@ app.use(cors({
   origin: process.env.CLIENT_ORIGIN,
   credentials: true
 }))
+app.get("/", (req, res) => {
+    res.json({message: "Backend Server Connected"})
+})
 app.use(cookieParser());
 app.use(express.json());
-app.use(Lead_Routes);
-app.use(Auth_Routes);
+app.use("/app",Lead_Routes);
+app.use("/auth", Auth_Routes);
 
 const PORT = process.env.PORT;
 connectDB();
